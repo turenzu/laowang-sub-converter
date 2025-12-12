@@ -479,11 +479,22 @@ function convertToBase64(nodes) {
                     id: node.uuid,
                     aid: node.alterId,
                     net: node.network,
+                    type: 'none',
+                    host: '',
+                    path: '',
                     tls: node.tls ? 'tls' : ''
                 }
+
+                if (node.ws) {
+                    vmessData.path = node.ws.path
+                    if (node.ws.headers && node.ws.headers.Host) {
+                        vmessData.host = node.ws.headers.Host
+                    }
+                }
+
                 return `vmess://${Buffer.from(JSON.stringify(vmessData)).toString('base64')}`
             case 'trojan':
-                return `trojan://${node.password}@${node.server}:${node.port}#${encodeURIComponent(node.name)}`
+                return `trojan://${node.password}@${node.server}:${node.port}?peer=${encodeURIComponent(node.sni || node.server)}#${encodeURIComponent(node.name)}`
             default:
                 return ''
         }
@@ -505,9 +516,41 @@ function convertToSingBox(nodes, options) {
             case 'ss':
                 return { ...base, type: 'shadowsocks', method: node.method, password: node.password }
             case 'vmess':
-                return { ...base, type: 'vmess', uuid: node.uuid, alter_id: node.alterId }
+                const vmess = {
+                    ...base,
+                    type: 'vmess',
+                    uuid: node.uuid,
+                    alter_id: node.alterId,
+                    security: 'auto'
+                }
+
+                if (node.tls) {
+                    vmess.tls = {
+                        enabled: true,
+                        server_name: node.ws?.headers?.Host || node.server,
+                        insecure: options.skipCert
+                    }
+                }
+
+                if (node.network === 'ws' && node.ws) {
+                    vmess.transport = {
+                        type: 'ws',
+                        path: node.ws.path,
+                        headers: node.ws.headers
+                    }
+                }
+
+                return vmess
             case 'trojan':
-                return { ...base, type: 'trojan', password: node.password }
+                const trojan = { ...base, type: 'trojan', password: node.password }
+                if (node.sni) {
+                    trojan.tls = {
+                        enabled: true,
+                        server_name: node.sni,
+                        insecure: options.skipCert
+                    }
+                }
+                return trojan
             default:
                 return base
         }
