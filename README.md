@@ -59,30 +59,26 @@
 
 ## 🚀 快速开始
 
-### Docker Compose (推荐)
+> [!IMPORTANT]
+> 本项目需要同时运行 **前端 + 后端** 才能使用完整的订阅转换功能。请使用 **Docker Compose** 部署。
+
+### Docker Compose（VPS 部署）
 
 ```bash
-# 克隆仓库
+# 1. 克隆仓库
 git clone https://github.com/tony-wang1990/laowang-sub-converter.git
 cd laowang-sub-converter
 
-# 启动服务
+# 2. 启动服务（前端 + 后端）
 docker-compose up -d
 
-# 访问 http://localhost
+# 3. 查看运行状态
+docker ps
 ```
 
-### Docker
+访问 `http://服务器IP` 即可使用完整的订阅转换功能！
 
-```bash
-docker run -d \
-  -p 8080:80 \
-  --name sub-converter \
-  --restart always \
-  ghcr.io/tony-wang1990/laowang-sub-converter:main
-```
-
-访问 `http://localhost:8080`
+> 💡 **多架构支持**：Docker 镜像同时支持 **AMD64** (Intel/AMD 服务器) 和 **ARM64** (树莓派/Oracle ARM 等)。
 
 ### 本地开发
 
