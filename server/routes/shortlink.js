@@ -1,8 +1,14 @@
-const express = require('express')
+import express from 'express'
+import crypto from 'crypto'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 const router = express.Router()
-const crypto = require('crypto')
-const fs = require('fs')
-const path = require('path')
+
+// 获取 __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // 数据存储路径
 const DATA_FILE = path.join(__dirname, '../data/shortlinks.json')
@@ -196,4 +202,4 @@ router.get('/:code/stats', (req, res) => {
     }
 })
 
-module.exports = router
+export default router
