@@ -72,7 +72,7 @@
 
             <div class="deploy-card glass-card">
               <div class="deploy-header">
-                <span class="deploy-icon"></span>
+                <span class="deploy-icon">🎨</span>
                 <h3>Render</h3>
               </div>
               <p>免费托管，自动 SSL</p>
@@ -90,7 +90,7 @@
 
              <div class="deploy-card glass-card">
               <div class="deploy-header">
-                <span class="deploy-icon"></span>
+                <span class="deploy-icon">🦅</span>
                 <h3>Koyeb</h3>
               </div>
               <p>高性能全球部署</p>
@@ -102,7 +102,7 @@
         <!-- Limited Deployment -->
         <div class="deploy-category mt-8">
           <h3 class="category-title limited">
-             <span> {{ $t('about.deployLimited') }}</span>
+             <span>⚠️ {{ $t('about.deployLimited') }}</span>
           </h3>
           <p class="category-desc warning">{{ $t('about.deployLimitedDesc') }}</p>
 
@@ -118,7 +118,7 @@
 
             <div class="deploy-card glass-card">
               <div class="deploy-header">
-                <span class="deploy-icon"></span>
+                <span class="deploy-icon">📦</span>
                 <h3>Netlify</h3>
               </div>
               <p>免费静态托管</p>
