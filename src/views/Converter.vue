@@ -21,6 +21,18 @@
         </div>
 
         <!-- 客户端选择 -->
+        <!-- API ??? -->
+        <div class="form-group api-selector">
+          <label class="form-label"> API ?</label>
+          <div class="api-options">
+            <label v-for="api in apiSources" :key="api.id" class="api-option" :class="{ active: selectedApi === api.id }">
+              <input type="radio" :value="api.id" v-model="selectedApi" />
+              <span class="api-name">{{ api.name }}</span>
+              <span class="api-desc">{{ api.desc }}</span>
+            </label>
+          </div>
+        </div>
+
         <ClientSelector v-model="selectedClient" />
 
         <!-- 高级选项 -->
