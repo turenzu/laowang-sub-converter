@@ -6,6 +6,9 @@ import { fileURLToPath } from 'url'
 // Import routes
 import convertRouter from './routes/convert.js'
 import shortlinkRouter from './routes/shortlink.js'
+import healthRouter from './routes/health.js'
+import mergeRouter from './routes/merge.js'
+import { getRulePresets } from './utils/rules.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -21,7 +24,14 @@ app.use(express.urlencoded({ extended: true }))
 // API routes
 app.use('/api/convert', convertRouter)
 app.use('/api/shortlink', shortlinkRouter)
+app.use('/api/health', healthRouter)
+app.use('/api/merge', mergeRouter)
 app.use('/s', shortlinkRouter)
+
+// 规则模板 API
+app.get('/api/rules/presets', (req, res) => {
+    res.json(getRulePresets())
+})
 
 // Health check
 app.get('/health', (req, res) => {

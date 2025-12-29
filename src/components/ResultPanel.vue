@@ -69,11 +69,34 @@ const copyLink = async () => {
 }
 
 const downloadConfig = () => {
-  const blob = new Blob([props.result], { type: 'text/plain' })
+  // 从 URL 中获取 target 参数以确定文件扩展名
+  let extension = 'txt'
+  let mimeType = 'text/plain'
+  
+  try {
+    const url = new URL(props.result)
+    const target = url.searchParams.get('target')
+    
+    if (target === 'singbox' || target === 'nekobox') {
+      extension = 'json'
+      mimeType = 'application/json'
+    } else if (['clash', 'clashmeta', 'stash'].includes(target)) {
+      extension = 'yaml'
+      mimeType = 'text/yaml'
+    } else if (['surge', 'loon', 'surfboard'].includes(target)) {
+      extension = 'conf'
+    } else if (['shadowrocket', 'v2rayn', 'v2rayng'].includes(target)) {
+      extension = 'txt'
+    }
+  } catch (e) {
+    // 如果解析失败，使用默认值
+  }
+  
+  const blob = new Blob([props.result], { type: mimeType })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'config.yaml'
+  a.download = `config.${extension}`
   a.click()
   URL.revokeObjectURL(url)
 }

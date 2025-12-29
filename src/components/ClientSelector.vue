@@ -39,6 +39,7 @@ const clients = [
   { id: 'loon', name: 'Loon', platform: 'iOS', icon: '🎈' },
   { id: 'v2rayn', name: 'V2RayN', platform: 'Windows', icon: '💻' },
   { id: 'v2rayng', name: 'V2RayNG', platform: 'Android', icon: '📱' },
+  { id: 'nekobox', name: 'NekoBox', platform: 'Android', icon: '🐱' },
   { id: 'surfboard', name: 'Surfboard', platform: 'Android', icon: '🏄' },
   { id: 'stash', name: 'Stash', platform: 'iOS/macOS', icon: '📦' },
   { id: 'singbox', name: 'sing-box', platform: '全平台', icon: '📦' }

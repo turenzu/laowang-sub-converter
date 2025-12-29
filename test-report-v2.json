@@ -1,0 +1,338 @@
+{
+  "timestamp": "2025-12-29T14:09:43.280Z",
+  "summary": {
+    "total": 31,
+    "passed": 31,
+    "failed": 0,
+    "warnings": 0
+  },
+  "tests": {
+    "parsing": {
+      "ss_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "SS Test Node",
+        "nodeType": "ss",
+        "server": "example.com",
+        "port": 8388
+      },
+      "ssr_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "SSRP Test Node",
+        "nodeType": "ssr",
+        "server": "example.com",
+        "port": 8388
+      },
+      "vmess_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "VMess Test Node",
+        "nodeType": "vmess",
+        "server": "example.com",
+        "port": 443
+      },
+      "vless_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "VLESS Test Node",
+        "nodeType": "vless",
+        "server": "example.com",
+        "port": 443
+      },
+      "vlessReality_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "VLESS Reality Test",
+        "nodeType": "vless",
+        "server": "example.com",
+        "port": 443
+      },
+      "trojan_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "Trojan Test Node",
+        "nodeType": "trojan",
+        "server": "example.com",
+        "port": 443
+      },
+      "hysteria_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "Hysteria Test Node",
+        "nodeType": "hysteria",
+        "server": "example.com",
+        "port": 443
+      },
+      "hysteria2_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "Hysteria2 Test Node",
+        "nodeType": "hysteria2",
+        "server": "example.com",
+        "port": 443
+      },
+      "tuic_parse": {
+        "passed": true,
+        "nodeCount": 1,
+        "nodeName": "TUIC Test Node",
+        "nodeType": "tuic",
+        "server": "example.com",
+        "port": 443
+      },
+      "emoji_香港节点": {
+        "passed": true,
+        "input": "香港节点",
+        "output": "🇭🇰 香港节点",
+        "expected": "🇭🇰"
+      },
+      "emoji_HK Node": {
+        "passed": true,
+        "input": "HK Node",
+        "output": "🇭🇰 HK Node",
+        "expected": "🇭🇰"
+      },
+      "emoji_日本东京": {
+        "passed": true,
+        "input": "日本东京",
+        "output": "🇯🇵 日本东京",
+        "expected": "🇯🇵"
+      },
+      "emoji_US Server": {
+        "passed": true,
+        "input": "US Server",
+        "output": "🇺🇸 US Server",
+        "expected": "🇺🇸"
+      },
+      "emoji_Singapore": {
+        "passed": true,
+        "input": "Singapore",
+        "output": "🇸🇬 Singapore",
+        "expected": "🇸🇬"
+      },
+      "emoji_Unknown Location": {
+        "passed": true,
+        "input": "Unknown Location",
+        "output": "🌐 Unknown Location",
+        "expected": "🌐"
+      },
+      "empty_input": {
+        "passed": true,
+        "result": "正确返回空数组"
+      },
+      "invalid_input": {
+        "passed": true,
+        "result": "正确忽略无效链接"
+      },
+      "base64_subscription": {
+        "passed": true,
+        "result": "解析出 2 个节点",
+        "expected": "应解析出 2 个节点"
+      }
+    },
+    "conversion": {
+      "to_clash": {
+        "passed": true,
+        "outputLength": 2996,
+        "outputType": "string",
+        "hasContent": true,
+        "hasYamlHeader": true
+      },
+      "to_clashmeta": {
+        "passed": true,
+        "outputLength": 2996,
+        "outputType": "string",
+        "hasContent": true,
+        "hasYamlHeader": true
+      },
+      "to_surge": {
+        "passed": true,
+        "outputLength": 737,
+        "outputType": "string",
+        "hasContent": true
+      },
+      "to_quantumultx": {
+        "passed": true,
+        "outputLength": 665,
+        "outputType": "string",
+        "hasContent": true
+      },
+      "to_shadowrocket": {
+        "passed": true,
+        "outputLength": 1760,
+        "outputType": "string",
+        "hasContent": true,
+        "isBase64": true
+      },
+      "to_loon": {
+        "passed": true,
+        "outputLength": 576,
+        "outputType": "string",
+        "hasContent": true
+      },
+      "to_v2rayn": {
+        "passed": true,
+        "outputLength": 1760,
+        "outputType": "string",
+        "hasContent": true,
+        "isBase64": true
+      },
+      "to_v2rayng": {
+        "passed": true,
+        "outputLength": 1760,
+        "outputType": "string",
+        "hasContent": true,
+        "isBase64": true
+      },
+      "to_nekobox": {
+        "passed": true,
+        "outputLength": 3586,
+        "outputType": "string",
+        "hasContent": true,
+        "validJson": true
+      },
+      "to_surfboard": {
+        "passed": true,
+        "outputLength": 737,
+        "outputType": "string",
+        "hasContent": true
+      },
+      "to_stash": {
+        "passed": true,
+        "outputLength": 2996,
+        "outputType": "string",
+        "hasContent": true,
+        "hasYamlHeader": true
+      },
+      "to_singbox": {
+        "passed": true,
+        "outputLength": 3586,
+        "outputType": "string",
+        "hasContent": true,
+        "validJson": true
+      },
+      "empty_nodes": {
+        "passed": true,
+        "result": "空节点数组转换正常"
+      }
+    },
+    "compatibility": {
+      "clash": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      },
+      "clashmeta": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      },
+      "stash": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      },
+      "surge": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "trojan": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅"
+      },
+      "quantumultx": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "trojan": "✅",
+        "hysteria2": "✅"
+      },
+      "shadowrocket": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      },
+      "loon": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "trojan": "✅",
+        "hysteria2": "✅"
+      },
+      "v2rayn": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      },
+      "v2rayng": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      },
+      "nekobox": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      },
+      "surfboard": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "trojan": "✅"
+      },
+      "singbox": {
+        "ss": "✅",
+        "vmess": "✅",
+        "vless": "✅",
+        "vlessReality": "✅",
+        "trojan": "✅",
+        "hysteria": "✅",
+        "hysteria2": "✅",
+        "tuic": "✅",
+        "ssr": "✅"
+      }
+    }
+  }
+}

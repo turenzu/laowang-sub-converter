@@ -20,6 +20,16 @@ const routes = [
         path: '/about',
         name: 'About',
         component: () => import('../views/About.vue')
+    },
+    {
+        path: '/health',
+        name: 'HealthCheck',
+        component: () => import('../views/HealthCheck.vue')
+    },
+    {
+        path: '/merge',
+        name: 'Merge',
+        component: () => import('../views/Merge.vue')
     }
 ]
 

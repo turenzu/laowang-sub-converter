@@ -194,7 +194,7 @@ function parseTrojan(uri) {
 
 // 添加 Emoji
 
-// Hysteria ??
+// Hysteria 解析
 function parseHysteria(uri) {
     try {
         const url = new URL(uri);
@@ -215,7 +215,7 @@ function parseHysteria(uri) {
     } catch (e) { return null; }
 }
 
-// Hysteria2 ??
+// Hysteria2 解析
 function parseHysteria2(uri) {
     try {
         const normalizedUri = uri.replace('hy2://', 'hysteria2://');
@@ -235,7 +235,7 @@ function parseHysteria2(uri) {
     } catch (e) { return null; }
 }
 
-// TUIC ??
+// TUIC 解析
 function parseTuic(uri) {
     try {
         const url = new URL(uri);
@@ -258,7 +258,7 @@ function parseTuic(uri) {
     } catch (e) { return null; }
 }
 
-// SSR ??
+// SSR 解析
 function parseSSR(uri) {
     try {
         const base64Part = uri.slice(6);
@@ -267,35 +267,88 @@ function parseSSR(uri) {
         const paramsPart = decoded.split('/?')[1] || '';
         const parts = mainPart.split(':');
         if (parts.length < 6) return null;
+
         const password = Buffer.from(parts[5].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString();
         const params = new URLSearchParams(paramsPart);
+
+        // 解析 remarks (节点名称)
         const remarksBase64 = params.get('remarks') || '';
         const name = remarksBase64 ? Buffer.from(remarksBase64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString() : 'SSR Node';
+
+        // 解析 protocolParam
+        const protoparamBase64 = params.get('protoparam') || '';
+        const protocolParam = protoparamBase64 ? Buffer.from(protoparamBase64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString() : '';
+
+        // 解析 obfsParam
+        const obfsparamBase64 = params.get('obfsparam') || '';
+        const obfsParam = obfsparamBase64 ? Buffer.from(obfsparamBase64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString() : '';
+
         return {
-            type: 'ssr', name, server: parts[0], port: parseInt(parts[1]),
-            protocol: parts[2], method: parts[3], obfs: parts[4], password,
-            protocolParam: '',
-            obfsParam: ''
+            type: 'ssr',
+            name,
+            server: parts[0],
+            port: parseInt(parts[1]),
+            protocol: parts[2],
+            method: parts[3],
+            obfs: parts[4],
+            password,
+            protocolParam,
+            obfsParam
         };
-    } catch (e) { return null; }
+    } catch (e) {
+        console.error('SSR parse error:', e.message);
+        return null;
+    }
 }
 
 export function addEmoji(name) {
-    const emojiMap = {
-        '香港': '🇭🇰', 'HK': '🇭🇰',
-        '台湾': '🇹🇼', 'TW': '🇹🇼',
-        '日本': '🇯🇵', 'JP': '🇯🇵',
-        '新加坡': '🇸🇬', 'SG': '🇸🇬',
-        '美国': '🇺🇸', 'US': '🇺🇸',
-        '韩国': '🇰🇷', 'KR': '🇰🇷',
-        '英国': '🇬🇧', 'UK': '🇬🇧',
-        '德国': '🇩🇪', 'DE': '🇩🇪',
-        '法国': '🇫🇷', 'FR': '🇫🇷',
-        '俄罗斯': '🇷🇺', 'RU': '🇷🇺'
-    }
+    // 按长度排序的映射表，先匹配较长的字符串避免误判
+    const emojiPairs = [
+        // 中文 (先匹配，中文不需要大小写转换)
+        ['香港', '🇭🇰'], ['台湾', '🇹🇼'], ['日本', '🇯🇵'], ['新加坡', '🇸🇬'],
+        ['美国', '🇺🇸'], ['韩国', '🇰🇷'], ['英国', '🇬🇧'], ['德国', '🇩🇪'],
+        ['法国', '🇫🇷'], ['俄罗斯', '🇷🇺'], ['加拿大', '🇨🇦'], ['澳大利亚', '🇦🇺'],
+        ['荷兰', '🇳🇱'], ['印度', '🇮🇳'], ['巴西', '🇧🇷'], ['土耳其', '🇹🇷'],
+        ['阿根廷', '🇦🇷'], ['越南', '🇻🇳'], ['泰国', '🇹🇭'], ['马来西亚', '🇲🇾'],
+        ['菲律宾', '🇵🇭'], ['印尼', '🇮🇩'], ['意大利', '🇮🇹'], ['西班牙', '🇪🇸'],
+        ['瑞士', '🇨🇭'], ['波兰', '🇵🇱'], ['乌克兰', '🇺🇦'], ['爱尔兰', '🇮🇪'],
+        // 英文全称
+        ['Hong Kong', '🇭🇰'], ['Taiwan', '🇹🇼'], ['Japan', '🇯🇵'], ['Singapore', '🇸🇬'],
+        ['United States', '🇺🇸'], ['America', '🇺🇸'], ['Korea', '🇰🇷'], ['United Kingdom', '🇬🇧'],
+        ['Germany', '🇩🇪'], ['France', '🇫🇷'], ['Russia', '🇷🇺'], ['Canada', '🇨🇦'],
+        ['Australia', '🇦🇺'], ['Netherlands', '🇳🇱'], ['India', '🇮🇳'], ['Brazil', '🇧🇷'],
+        ['Turkey', '🇹🇷'], ['Italy', '🇮🇹'], ['Spain', '🇪🇸'], ['Switzerland', '🇨🇭'],
+        ['Poland', '🇵🇱'], ['Ukraine', '🇺🇦'], ['Ireland', '🇮🇪'], ['Thailand', '🇹🇭'],
+        ['Vietnam', '🇻🇳'], ['Malaysia', '🇲🇾'], ['Philippines', '🇵🇭'], ['Indonesia', '🇮🇩'],
+        ['Argentina', '🇦🇷'],
+        // 英文缩写 (最后匹配，只在单词边界匹配)
+        ['HK', '🇭🇰'], ['TW', '🇹🇼'], ['JP', '🇯🇵'], ['SG', '🇸🇬'],
+        ['US', '🇺🇸'], ['KR', '🇰🇷'], ['UK', '🇬🇧'], ['DE', '🇩🇪'],
+        ['FR', '🇫🇷'], ['RU', '🇷🇺'], ['CA', '🇨🇦'], ['AU', '🇦🇺'],
+        ['NL', '🇳🇱'], ['BR', '🇧🇷'], ['TR', '🇹🇷']
+    ]
 
-    for (const [key, emoji] of Object.entries(emojiMap)) {
-        if (name.includes(key)) {
+    const nameLower = name.toLowerCase()
+
+    for (const [key, emoji] of emojiPairs) {
+        // 判断是否为中文
+        const isChinese = /[\u4e00-\u9fa5]/.test(key)
+        // 判断是否为2字符英文缩写
+        const isShortCode = key.length === 2 && /^[A-Z]+$/.test(key)
+
+        if (isChinese) {
+            // 中文直接匹配
+            if (name.includes(key)) {
+                return `${emoji} ${name}`
+            }
+        } else if (isShortCode) {
+            // 对于2字符的缩写，使用单词边界匹配避免误判
+            const regex = new RegExp(`\\b${key}\\b`, 'i')
+            if (regex.test(name)) {
+                return `${emoji} ${name}`
+            }
+        } else if (nameLower.includes(key.toLowerCase())) {
+            // 英文全称不区分大小写匹配
             return `${emoji} ${name}`
         }
     }

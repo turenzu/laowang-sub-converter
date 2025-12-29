@@ -10,6 +10,7 @@ const SUPPORTED_CLIENTS = {
     loon: 'loon',
     v2rayn: 'v2rayn',
     v2rayng: 'v2rayng',
+    nekobox: 'nekobox',
     surfboard: 'surfboard',
     stash: 'stash',
     singbox: 'singbox'

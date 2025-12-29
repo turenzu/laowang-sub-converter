@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import ClientSelector from '../components/ClientSelector.vue'
 import AdvancedOptions from '../components/AdvancedOptions.vue'
 import ResultPanel from '../components/ResultPanel.vue'
@@ -75,13 +75,19 @@ const subscriptionUrl = ref('')
 const selectedClient = ref('')
 const selectedApi = ref('local')
 
-// ?? API ???
+// 备用 API 源配置
 const apiSources = [
-  { id: 'local', name: '????', desc: '??????', url: '' },
-  { id: 'v1mk', name: 'v1.mk', desc: '????API', url: 'https://api.v1.mk' },
-  { id: 'xeton', name: 'xeton.dev', desc: '????API', url: 'https://sub.xeton.dev' },
-  { id: 'dler', name: 'dler.io', desc: '????API', url: 'https://api.dler.io' }
+  { id: 'local', name: '本地服务', desc: '使用本项目后端', url: '' },
+  { id: 'v1mk', name: 'v1.mk', desc: '第三方 API', url: 'https://api.v1.mk' },
+  { id: 'xeton', name: 'xeton.dev', desc: '第三方 API', url: 'https://sub.xeton.dev' },
+  { id: 'dler', name: 'dler.io', desc: '第三方 API', url: 'https://api.dler.io' }
 ]
+
+// 获取当前选中的 API 信息
+const currentApi = computed(() => {
+  return apiSources.find(api => api.id === selectedApi.value) || apiSources[0]
+})
+
 const advancedOptions = reactive({
   emoji: true,
   udp: true,
@@ -103,8 +109,14 @@ const convertSubscription = async () => {
   convertedUrl.value = ''
 
   try {
-    // 构建转换 URL
-    const baseUrl = window.location.origin
+    // 根据选择的 API 构建基础 URL
+    let apiBaseUrl = ''
+    if (selectedApi.value === 'local') {
+      apiBaseUrl = window.location.origin
+    } else {
+      apiBaseUrl = currentApi.value.url
+    }
+
     const params = new URLSearchParams({
       target: selectedClient.value,
       url: subscriptionUrl.value,
@@ -121,9 +133,18 @@ const convertSubscription = async () => {
     if (advancedOptions.rename) {
       params.append('rename', advancedOptions.rename)
     }
+    
+    if (advancedOptions.rulePreset) {
+      params.append('rulePreset', advancedOptions.rulePreset)
+    }
 
-    // 生成转换后的链接
-    convertedUrl.value = `${baseUrl}/api/convert?${params.toString()}`
+    // 根据不同 API 构建转换链接
+    if (selectedApi.value === 'local') {
+      convertedUrl.value = `${apiBaseUrl}/api/convert?${params.toString()}`
+    } else {
+      // 第三方 API 使用 /sub 接口 (可能不支持 rulePreset，但我们还是传过去)
+      convertedUrl.value = `${apiBaseUrl}/sub?${params.toString()}`
+    }
 
     // 模拟 API 调用延迟
     await new Promise(resolve => setTimeout(resolve, 500))
@@ -138,6 +159,7 @@ const convertSubscription = async () => {
 const resetForm = () => {
   subscriptionUrl.value = ''
   selectedClient.value = ''
+  selectedApi.value = 'local'
   convertedUrl.value = ''
   error.value = ''
   advancedOptions.emoji = true
@@ -146,6 +168,7 @@ const resetForm = () => {
   advancedOptions.sort = false
   advancedOptions.filter = ''
   advancedOptions.rename = ''
+  advancedOptions.rulePreset = ''
 }
 </script>
 

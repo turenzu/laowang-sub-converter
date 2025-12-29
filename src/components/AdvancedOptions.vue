@@ -44,6 +44,19 @@
           </label>
         </div>
 
+        <!-- 规则模板 -->
+        <div class="form-group">
+          <label class="form-label">规则配置模板</label>
+          <select v-model="options.rulePreset" class="form-select">
+            <option value="">默认模板</option>
+            <option value="basic">基础模板 (最小化)</option>
+            <option value="standard">标准模板 (推荐)</option>
+            <option value="developer">开发者模板 (GitHub/NPM)</option>
+            <option value="gaming">游戏加速模板</option>
+            <option value="streaming">流媒体解锁模板</option>
+          </select>
+        </div>
+
         <!-- 过滤规则 -->
         <div class="form-group">
           <label class="form-label">{{ $t('options.filter') }}</label>
@@ -90,7 +103,8 @@ const options = reactive({
   skipCert: false,
   sort: false,
   filter: '',
-  rename: ''
+  rename: '',
+  rulePreset: ''
 })
 
 watch(options, (newVal) => {
@@ -210,5 +224,16 @@ watch(options, (newVal) => {
 .expand-leave-from {
   opacity: 1;
   max-height: 500px;
+}
+
+.form-select {
+  width: 100%;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  margin-top: 5px;
 }
 </style>

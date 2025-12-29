@@ -13,6 +13,7 @@ const SUPPORTED_CLIENTS = {
     loon: 'loon',
     v2rayn: 'v2rayn',
     v2rayng: 'v2rayng',
+    nekobox: 'nekobox',
     surfboard: 'surfboard',
     stash: 'stash',
     singbox: 'singbox'
@@ -30,7 +31,8 @@ router.get('/', async (req, res) => {
             sort = '0',
             include = '',
             exclude = '',
-            rename = ''
+            rename = '',
+            rulePreset = ''
         } = req.query
 
         // 参数验证
@@ -108,7 +110,8 @@ router.get('/', async (req, res) => {
         // 转换为目标格式
         const output = convertToTarget(nodes, target, {
             udp: udp === '1',
-            skipCert: scert === '1'
+            skipCert: scert === '1',
+            rulePreset
         })
 
         // 设置响应头

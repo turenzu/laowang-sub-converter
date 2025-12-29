@@ -1,4 +1,5 @@
 import yaml from 'js-yaml'
+import { applyRulePreset } from './rules.js'
 
 // 转换核心逻辑
 export function convertToTarget(nodes, target, options) {
@@ -112,33 +113,111 @@ function convertToClash(nodes, options) {
                 if (node.sni) trojan.sni = node.sni
                 if (node.alpn && node.alpn.length) trojan.alpn = node.alpn
                 return trojan
+            case 'hysteria':
+                return {
+                    name: node.name,
+                    type: 'hysteria',
+                    server: node.server,
+                    port: node.port,
+                    auth_str: node.auth,
+                    up: node.up,
+                    down: node.down,
+                    alpn: [node.alpn || 'h3'],
+                    obfs: node.obfs || '',
+                    sni: node.sni,
+                    'skip-cert-verify': node.insecure || options.skipCert,
+                    udp: options.udp
+                }
+            case 'hysteria2':
+                const hy2 = {
+                    name: node.name,
+                    type: 'hysteria2',
+                    server: node.server,
+                    port: node.port,
+                    password: node.password,
+                    sni: node.sni,
+                    'skip-cert-verify': node.insecure || options.skipCert,
+                    udp: options.udp
+                }
+                if (node.obfs) {
+                    hy2.obfs = node.obfs
+                    hy2['obfs-password'] = node.obfsPassword || ''
+                }
+                return hy2
+            case 'tuic':
+                return {
+                    name: node.name,
+                    type: 'tuic',
+                    server: node.server,
+                    port: node.port,
+                    uuid: node.uuid,
+                    password: node.password,
+                    alpn: node.alpn || ['h3'],
+                    'congestion-controller': node.congestion || 'bbr',
+                    'disable-sni': false,
+                    'reduce-rtt': true,
+                    sni: node.sni,
+                    'skip-cert-verify': node.insecure || options.skipCert,
+                    'udp-relay-mode': node.udpRelayMode || 'native',
+                    udp: options.udp
+                }
+            case 'ssr':
+                return {
+                    name: node.name,
+                    type: 'ssr',
+                    server: node.server,
+                    port: node.port,
+                    cipher: node.method,
+                    password: node.password,
+                    protocol: node.protocol,
+                    'protocol-param': node.protocolParam || '',
+                    obfs: node.obfs,
+                    'obfs-param': node.obfsParam || '',
+                    udp: options.udp
+                }
             default:
                 return null
         }
     }).filter(Boolean)
 
     // 构建完整的 Clash 配置
+    const nodeNames = nodes.map(n => n.name)
+
+    // 如果有规则模板配置
+    let proxyGroups, rules
+    if (options.rulePreset) {
+        try {
+            const ruleConfig = applyRulePreset(nodes, options.rulePreset, options)
+            proxyGroups = ruleConfig.proxyGroups
+            rules = ruleConfig.rules
+        } catch (e) {
+            console.error('Failed to apply rule preset:', e)
+            // 如果加载规则失败，使用默认配置
+            proxyGroups = [
+                { name: '🚀 节点选择', type: 'select', proxies: ['♻️ 自动选择', 'DIRECT', ...nodeNames] },
+                { name: '♻️ 自动选择', type: 'url-test', proxies: nodeNames, url: 'http://www.gstatic.com/generate_204', interval: 300 }
+            ]
+            rules = ['GEOIP,LAN,DIRECT', 'GEOIP,CN,DIRECT', 'MATCH,🚀 节点选择']
+        }
+    } else {
+        // 默认配置
+        proxyGroups = [
+            { name: '🚀 节点选择', type: 'select', proxies: ['♻️ 自动选择', 'DIRECT', ...nodeNames] },
+            { name: '♻️ 自动选择', type: 'url-test', proxies: nodeNames, url: 'http://www.gstatic.com/generate_204', interval: 300 }
+        ]
+        rules = ['GEOIP,LAN,DIRECT', 'GEOIP,CN,DIRECT', 'MATCH,🚀 节点选择']
+    }
+
     const config = {
         proxies: proxies,
-        'proxy-groups': [
-            {
-                name: '🚀 节点选择',
-                type: 'select',
-                proxies: ['♻️ 自动选择', 'DIRECT', ...nodes.map(n => n.name)]
-            },
-            {
-                name: '♻️ 自动选择',
-                type: 'url-test',
-                proxies: nodes.map(n => n.name),
-                url: 'http://www.gstatic.com/generate_204',
-                interval: 300
-            }
-        ]
+        'proxy-groups': proxyGroups,
+        rules: rules
     }
 
     // 转换为 YAML 格式
     return `# LaoWang Sub-converter 生成
 # 节点数量: ${nodes.length}
+# 规则模板: ${options.rulePreset || 'default'}
 # 生成时间: ${new Date().toISOString()}
 
 ${yaml.dump(config, { lineWidth: -1 })}`
@@ -161,7 +240,6 @@ function convertToSurge(nodes, options) {
                 if (options.skipCert) vmess += ', skip-cert-verify=true'
                 return vmess
             case 'vless':
-                // Surge VLESS support is limited/external usually, but we output standard format if applicable
                 // Surge 5 支持 VLESS
                 let vless = `${node.name} = vless, ${node.server}, ${node.port}, username=${node.uuid}`
                 if (node.tls) vless += ', tls=true'
@@ -170,15 +248,22 @@ function convertToSurge(nodes, options) {
                     vless += ', ws=true'
                     if (node.ws.path) vless += `, ws-path=${node.ws.path}`
                 }
-                if (node.reality) {
-                    // Surge doesn't fully support Reality in standardized config yet commonly, but passing params best effort
-                }
                 return vless
             case 'trojan':
                 let trojan = `${node.name} = trojan, ${node.server}, ${node.port}, password=${node.password}`
                 if (node.sni) trojan += `, sni=${node.sni}`
                 if (options.skipCert) trojan += ', skip-cert-verify=true'
                 return trojan
+            case 'hysteria2':
+                let hy2 = `${node.name} = hysteria2, ${node.server}, ${node.port}, password=${node.password}`
+                if (node.sni) hy2 += `, sni=${node.sni}`
+                if (options.skipCert || node.insecure) hy2 += ', skip-cert-verify=true'
+                return hy2
+            case 'tuic':
+                let tuic = `${node.name} = tuic, ${node.server}, ${node.port}, token=${node.uuid}:${node.password}`
+                if (node.sni) tuic += `, sni=${node.sni}`
+                if (options.skipCert || node.insecure) tuic += ', skip-cert-verify=true'
+                return tuic
             default:
                 return ''
         }
@@ -215,6 +300,11 @@ function convertToQuantumultX(nodes, options) {
                 if (node.sni) trojan += `, tls-host=${node.sni}`
                 if (options.skipCert) trojan += ', tls-verification=false'
                 return trojan
+            case 'hysteria2':
+                let hy2 = `hysteria2=${node.server}:${node.port}, password=${node.password}, tag=${node.name}`
+                if (node.sni) hy2 += `, sni=${node.sni}`
+                if (options.skipCert || node.insecure) hy2 += ', tls-verification=false'
+                return hy2
             default:
                 return ''
         }
@@ -251,6 +341,11 @@ function convertToLoon(nodes, options) {
                 if (node.sni) trojan += `,sni=${node.sni}`
                 if (options.skipCert) trojan += ',skip-cert-verify=true'
                 return trojan
+            case 'hysteria2':
+                let hy2 = `${node.name} = Hysteria2,${node.server},${node.port},"${node.password}"`
+                if (node.sni) hy2 += `,sni=${node.sni}`
+                if (options.skipCert || node.insecure) hy2 += ',skip-cert-verify=true'
+                return hy2
             default:
                 return ''
         }
@@ -288,7 +383,6 @@ function convertToBase64(nodes) {
 
                 return `vmess://${Buffer.from(JSON.stringify(vmessData)).toString('base64')}`
             case 'vless':
-                // simple vless://uuid@host:port?params#name
                 let vless = `vless://${node.uuid}@${node.server}:${node.port}?encryption=none&type=${node.network}`
                 if (node.tls) vless += '&security=tls'
                 if (node.flow) vless += `&flow=${node.flow}`
@@ -300,15 +394,57 @@ function convertToBase64(nodes) {
                     if (node.grpc.serviceName) vless += `&serviceName=${encodeURIComponent(node.grpc.serviceName)}`
                 }
                 if (node.reality) {
-                    vless += '&security=reality'
+                    vless = vless.replace('&security=tls', '&security=reality')
                     if (node.reality.publicKey) vless += `&pbk=${node.reality.publicKey}`
                     if (node.reality.shortId) vless += `&sid=${node.reality.shortId}`
                     if (node.reality.sni) vless += `&sni=${node.reality.sni}`
+                    vless += '&fp=chrome'
                 }
                 vless += `#${encodeURIComponent(node.name)}`
                 return vless
             case 'trojan':
-                return `trojan://${node.password}@${node.server}:${node.port}?peer=${encodeURIComponent(node.sni || node.server)}#${encodeURIComponent(node.name)}`
+                // 使用 sni 参数而不是 peer，更兼容
+                let trojan = `trojan://${encodeURIComponent(node.password)}@${node.server}:${node.port}`
+                trojan += `?sni=${encodeURIComponent(node.sni || node.server)}`
+                if (node.alpn && node.alpn.length) trojan += `&alpn=${encodeURIComponent(node.alpn.join(','))}`
+                trojan += `#${encodeURIComponent(node.name)}`
+                return trojan
+            case 'hysteria':
+                let hy1 = `hysteria://${node.server}:${node.port}`
+                hy1 += `?auth=${encodeURIComponent(node.auth)}`
+                hy1 += `&upmbps=${node.up}&downmbps=${node.down}`
+                if (node.alpn) hy1 += `&alpn=${node.alpn}`
+                if (node.obfs) hy1 += `&obfs=${node.obfs}`
+                if (node.sni) hy1 += `&peer=${encodeURIComponent(node.sni)}`
+                if (node.insecure) hy1 += '&insecure=1'
+                hy1 += `#${encodeURIComponent(node.name)}`
+                return hy1
+            case 'hysteria2':
+                let hy2 = `hysteria2://${encodeURIComponent(node.password)}@${node.server}:${node.port}`
+                if (node.sni) hy2 += `?sni=${encodeURIComponent(node.sni)}`
+                if (node.obfs) hy2 += `&obfs=${node.obfs}&obfs-password=${encodeURIComponent(node.obfsPassword || '')}`
+                if (node.insecure) hy2 += '&insecure=1'
+                hy2 += `#${encodeURIComponent(node.name)}`
+                return hy2
+            case 'tuic':
+                let tuic = `tuic://${node.uuid}:${encodeURIComponent(node.password)}@${node.server}:${node.port}`
+                tuic += `?congestion_control=${node.congestion || 'bbr'}`
+                if (node.alpn && node.alpn.length) tuic += `&alpn=${encodeURIComponent(node.alpn.join(','))}`
+                if (node.sni) tuic += `&sni=${encodeURIComponent(node.sni)}`
+                if (node.udpRelayMode) tuic += `&udp_relay_mode=${node.udpRelayMode}`
+                if (node.insecure) tuic += '&allow_insecure=1'
+                tuic += `#${encodeURIComponent(node.name)}`
+                return tuic
+            case 'ssr':
+                // SSR 使用特殊的 Base64 编码格式
+                const ssrMain = `${node.server}:${node.port}:${node.protocol}:${node.method}:${node.obfs}:${Buffer.from(node.password).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')}`
+                let ssrParams = ''
+                if (node.protocolParam) ssrParams += `protoparam=${Buffer.from(node.protocolParam).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')}`
+                if (node.obfsParam) ssrParams += `&obfsparam=${Buffer.from(node.obfsParam).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')}`
+                const remarks = Buffer.from(node.name).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+                ssrParams += `&remarks=${remarks}`
+                const ssrFull = ssrParams ? `${ssrMain}/?${ssrParams}` : ssrMain
+                return `ssr://${Buffer.from(ssrFull).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')}`
             default:
                 return ''
         }
@@ -393,7 +529,70 @@ function convertToSingBox(nodes, options) {
                         insecure: options.skipCert
                     }
                 }
+                if (node.alpn && node.alpn.length) {
+                    trojan.tls = trojan.tls || { enabled: true }
+                    trojan.tls.alpn = node.alpn
+                }
                 return trojan
+            case 'hysteria':
+                return {
+                    ...base,
+                    type: 'hysteria',
+                    auth_str: node.auth,
+                    up_mbps: parseInt(node.up) || 100,
+                    down_mbps: parseInt(node.down) || 100,
+                    tls: {
+                        enabled: true,
+                        server_name: node.sni || node.server,
+                        insecure: node.insecure || options.skipCert,
+                        alpn: [node.alpn || 'h3']
+                    },
+                    obfs: node.obfs || undefined
+                }
+            case 'hysteria2':
+                const hy2 = {
+                    ...base,
+                    type: 'hysteria2',
+                    password: node.password,
+                    tls: {
+                        enabled: true,
+                        server_name: node.sni || node.server,
+                        insecure: node.insecure || options.skipCert
+                    }
+                }
+                if (node.obfs) {
+                    hy2.obfs = {
+                        type: node.obfs,
+                        password: node.obfsPassword || ''
+                    }
+                }
+                return hy2
+            case 'tuic':
+                return {
+                    ...base,
+                    type: 'tuic',
+                    uuid: node.uuid,
+                    password: node.password,
+                    congestion_control: node.congestion || 'bbr',
+                    udp_relay_mode: node.udpRelayMode || 'native',
+                    tls: {
+                        enabled: true,
+                        server_name: node.sni || node.server,
+                        insecure: node.insecure || options.skipCert,
+                        alpn: node.alpn || ['h3']
+                    }
+                }
+            case 'ssr':
+                return {
+                    ...base,
+                    type: 'shadowsocksr',
+                    method: node.method,
+                    password: node.password,
+                    protocol: node.protocol,
+                    protocol_param: node.protocolParam || '',
+                    obfs: node.obfs,
+                    obfs_param: node.obfsParam || ''
+                }
             default:
                 return base
         }

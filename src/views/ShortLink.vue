@@ -81,16 +81,17 @@ const createShortLink = async () => {
     if (!response.ok) throw new Error('Failed')
     const data = await response.json()
     shortLinks.value.unshift({
-      id: data.code,
-      shortUrl: window.location.origin + '/s/' + data.code,
-      originalUrl: newUrl.value,
-      clicks: 0,
-      createdAt: new Date()
+      id: data.id,
+      shortUrl: data.shortUrl,
+      originalUrl: data.originalUrl,
+      clicks: data.clicks || 0,
+      createdAt: data.created || new Date().toISOString()
     })
     newUrl.value = ''
     customCode.value = ''
   } catch (e) {
-    console.error(e)
+    console.error('创建短链接失败:', e)
+    alert('创建短链接失败，请重试')
   } finally {
     loading.value = false
   }
@@ -98,31 +99,47 @@ const createShortLink = async () => {
 
 const loadShortLinks = async () => {
   try {
-    const response = await fetch('/api/shortlink')
+    // 正确的 API 端点是 /api/shortlink/list
+    const response = await fetch('/api/shortlink/list')
     if (response.ok) {
       const data = await response.json()
-      shortLinks.value = data.map(item => ({
-        id: item.code,
-        shortUrl: window.location.origin + '/s/' + item.code,
-        originalUrl: item.url,
+      // 使用正确的字段名: data.links 包含 id, shortUrl, originalUrl, clicks, createdAt
+      shortLinks.value = (data.links || []).map(item => ({
+        id: item.id,
+        shortUrl: item.shortUrl,
+        originalUrl: item.originalUrl,
         clicks: item.clicks || 0,
-        createdAt: new Date(item.createdAt)
+        createdAt: item.createdAt
       }))
     }
   } catch (e) {
-    console.error(e)
+    console.error('加载短链接列表失败:', e)
   }
 }
 
-const copyLink = (url) => { navigator.clipboard.writeText(url) }
-const deleteLink = async (id) => {
+const copyLink = async (url) => {
   try {
-    await fetch('/api/shortlink/' + id, { method: 'DELETE' })
-    shortLinks.value = shortLinks.value.filter(link => link.id !== id)
-  } catch (e) { console.error(e) }
+    await navigator.clipboard.writeText(url)
+    alert('复制成功！')
+  } catch (e) {
+    console.error('复制失败:', e)
+  }
 }
-const truncateUrl = (url) => url.length > 40 ? url.substring(0, 40) + '...' : url
-const formatDate = (date) => new Date(date).toLocaleDateString()
+
+const deleteLink = async (id) => {
+  if (!confirm('确定要删除这个短链接吗？')) return
+  try {
+    const response = await fetch('/api/shortlink/' + id, { method: 'DELETE' })
+    if (response.ok) {
+      shortLinks.value = shortLinks.value.filter(link => link.id !== id)
+    }
+  } catch (e) {
+    console.error('删除失败:', e)
+  }
+}
+
+const truncateUrl = (url) => url && url.length > 40 ? url.substring(0, 40) + '...' : url
+const formatDate = (date) => date ? new Date(date).toLocaleDateString() : '-'
 
 onMounted(() => { loadShortLinks() })
 </script>

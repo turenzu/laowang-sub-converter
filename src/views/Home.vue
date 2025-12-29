@@ -47,6 +47,18 @@
         </h2>
         
         <div class="features-grid">
+          <router-link to="/health" class="feature-card glass-card feature-link">
+            <div class="feature-icon">🩺</div>
+            <h3>节点健康检测</h3>
+            <p>实时测试节点延迟，自动过滤无效节点，确保订阅质量</p>
+          </router-link>
+
+          <router-link to="/merge" class="feature-card glass-card feature-link">
+             <div class="feature-icon">📎</div>
+             <h3>订阅合并</h3>
+             <p>支持多个订阅合并、去重、排序及规则分流配置</p>
+          </router-link>
+          
           <div class="feature-card glass-card">
             <div class="feature-icon">🔄</div>
             <h3>多协议支持</h3>
@@ -66,21 +78,9 @@
           </div>
           
           <div class="feature-card glass-card">
-            <div class="feature-icon">🌍</div>
-            <h3>多语言支持</h3>
-            <p>支持中文、英文、俄语、波斯语等多种语言界面</p>
-          </div>
-          
-          <div class="feature-card glass-card">
-            <div class="feature-icon">🐳</div>
-            <h3>多种部署方式</h3>
-            <p>支持 Docker、Cloudflare、Vercel、VPS 等多种部署方式</p>
-          </div>
-          
-          <div class="feature-card glass-card">
             <div class="feature-icon">⚙️</div>
             <h3>高级配置</h3>
-            <p>节点过滤、重命名、排序、Emoji 添加等高级功能</p>
+            <p>节点过滤、重命名、排序、规则分流、Emoji 添加等高级功能</p>
           </div>
         </div>
       </div>
