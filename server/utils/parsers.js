@@ -154,7 +154,7 @@ function parseVless(uri) {
             uuid: url.username,
             flow: params.get('flow') || '',
             network: params.get('type') || 'tcp',
-            tls: params.get('security') === 'tls' || params.get('tls') === '1',
+            tls: ['tls', 'reality'].includes(params.get('security')) || params.get('tls') === '1',
             ws: params.get('type') === 'ws' ? {
                 path: params.get('path') || '/',
                 headers: params.get('host') ? { Host: params.get('host') } : {}

@@ -290,6 +290,11 @@ function convertToQuantumultX(nodes, options) {
                 let vless = `vless=${node.server}:${node.port}, method=none, password=${node.uuid}, tag=${node.name}`
                 if (node.tls) vless += ', tls=1'
                 if (options.skipCert) vless += ', tls-verification=false'
+                if (node.reality) {
+                    vless += ', reality-public-key=' + node.reality.publicKey
+                    vless += ', reality-short-id=' + node.reality.shortId
+                    if (node.reality.sni) vless += ', reality-server-name=' + node.reality.sni
+                }
                 if (node.network === 'ws' && node.ws) {
                     vless += ', obfs=ws'
                     if (node.ws.path) vless += `, obfs-uri=${node.ws.path}`
